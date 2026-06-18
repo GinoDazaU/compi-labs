@@ -76,4 +76,20 @@ void visit(MatrixAccessExp* exp) {
     emit("movq base(%rbp), %rcx");   // %rcx = puntero heap
     emit("movq (%rcx, %rax, 8), %rax"); // %rax = M[r * Cols + c]
 }
+
+// Escritura (Ej: matrix[r][c] = valor)
+void visit(MatrixAssignStm* stm) {
+    stm->rowExpr->accept(this);      // %rax = r
+    emit("imulq $Cols, %rax");       // %rax = r * Cols
+    emit("pushq %rax");
+    stm->colExpr->accept(this);      // %rax = c
+    emit("popq %rcx");
+    emit("addq %rcx, %rax");         // %rax = r * Cols + c (índice k)
+    emit("pushq %rax");
+    stm->valueExpr->accept(this);    // %rax = valor a asignar
+    emit("movq %rax, %rcx");         // %rcx = valor
+    emit("popq %rdi");               // %rdi = índice k
+    emit("movq base(%rbp), %rax");   // %rax = puntero heap
+}
 ```
+
