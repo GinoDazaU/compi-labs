@@ -32,23 +32,25 @@ Para acceder a `matrix[rowExpr][colExpr]`, realizamos la conversión del índice
 1.  Evaluamos `rowExpr` en `%rax`.
 2.  Multiplicamos por el número de columnas (`Cols` de la matriz) usando `imulq $Cols, %rax`.
 3.  Evaluamos `colExpr` en `%rax` y lo sumamos a la multiplicación previa.
-4.  Cargamos la base de la matriz y accedemos a la celda usando direccionamiento indexado escalado en 8 bytes: `(%base, %rax, 8)`.
+4.  Movemos el índice lineal a `%rdi`.
+5.  Cargamos la base de la matriz en `%rax` y accedemos a la celda usando direccionamiento indexado escalado en 8 bytes: `(%rax, %rdi, 8)`.
 
 ```
 rax = rowExpr
 rax = rax * Cols
 rcx = colExpr
 rax = rax + rcx
-base = pila[nombre]
-rax = * (base + rax * 8)
+rdi = rax
+rax = pila[nombre]
+rax = * (rax + rdi * 8)
 ```
 
 ### C. Asignación (`MatrixAssignStm`)
 Para escribir `matrix[rowExpr][colExpr] = valueExpr`:
-1.  Calculamos el índice lineal de destino ($k = rowExpr \times Cols + colExpr$) y lo guardamos temporalmente.
+1.  Calculamos el índice lineal de destino ($k = rowExpr \times Cols + colExpr$) y lo guardamos en `%rdi`.
 2.  Evaluamos la expresión de valor y lo guardamos en `%rcx`.
 3.  Cargamos la dirección base del heap en `%rax`.
-4.  Escribimos en memoria el valor usando el índice destino: `*(rax + index * 8) = rcx`.
+4.  Escribimos en memoria el valor usando el direccionamiento indexado: `*(rax + rdi * 8) = rcx`.
 
 ---
 
@@ -72,9 +74,10 @@ void visit(MatrixAccessExp* exp) {
     emit("pushq %rax");
     exp->colExpr->accept(this);      // %rax = c
     emit("popq %rcx");
-    emit("addq %rcx, %rax");         // %rax = r * Cols + c
-    emit("movq base(%rbp), %rcx");   // %rcx = puntero heap
-    emit("movq (%rcx, %rax, 8), %rax"); // %rax = M[r * Cols + c]
+    emit("addq %rcx, %rax");         // %rax = r * Cols + c (index k)
+    emit("movq %rax, %rdi");         // %rdi = index k
+    emit("movq base(%rbp), %rax");   // %rax = puntero heap (base)
+    emit("movq (%rax, %rdi, 8), %rax"); // %rax = M[base + k * 8]
 }
 
 // Escritura (Ej: matrix[r][c] = valor)
@@ -89,7 +92,8 @@ void visit(MatrixAssignStm* stm) {
     stm->valueExpr->accept(this);    // %rax = valor a asignar
     emit("movq %rax, %rcx");         // %rcx = valor
     emit("popq %rdi");               // %rdi = índice k
-    emit("movq base(%rbp), %rax");   // %rax = puntero heap
+    emit("movq base(%rbp), %rax");   // %rax = puntero heap (base)
+    emit("movq %rcx, (%rax, %rdi, 8)"); // Escribe el valor en la dirección calculada
 }
 ```
 
