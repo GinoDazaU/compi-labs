@@ -1,8 +1,0 @@
-fun int main()
-    var int a,b;
-    // DO WHILE // 
-    // BREAK // 
-    // SWITCH //
-    // OPERACIONES LOGICAS Y DE RELACION //
-    return(0)
-endfun

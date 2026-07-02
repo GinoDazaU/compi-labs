@@ -1,11 +1,15 @@
-# i = 0
-# n = 4
-# while i < n:
+# x = 1
+# i = 1
+# n = 10
+# while(i < n):
 #     print(i)
 #     i = i + 1
-# print(100)
+#     x = x * 2
+#     print(x)
+# print(i)
+
 .data
-print_fmt: .string "%ld\n"
+__fmt_int: .string "%ld\n"
 
 .text
 .globl main
@@ -13,21 +17,21 @@ print_fmt: .string "%ld\n"
 main:
     pushq %rbp
     movq %rsp, %rbp
-    subq $16, %rsp
+    subq $24, %rsp
 
-    # i = 0
-    movq $0, %rax
+    movq $1, %rax
     movq %rax, -8(%rbp)
 
-    # n = 4
-    movq $4, %rax
+    movq $1, %rax
     movq %rax, -16(%rbp)
+    
+    movq $10, %rax
+    movq %rax, -24(%rbp)
 
-label_while_cond:
-    # i < n -> %rax
-    movq -8(%rbp), %rax
-    pushq %rax
+__while_0:
     movq -16(%rbp), %rax
+    pushq %rax
+    movq -24(%rbp), %rax
     movq %rax, %rcx
     popq %rax
     cmpq %rcx, %rax
@@ -35,32 +39,44 @@ label_while_cond:
     setl %al
     movzbq %al, %rax
 
-    # while i < n:
     cmpq $0, %rax
-    je label_while_end
+    je __endwhile_0
 
-label_while_body:
-    movq -8(%rbp), %rax
+    movq -16(%rbp), %rax
     movq %rax, %rsi
     movq $0, %rax
-    leaq print_fmt(%rip), %rdi
+    leaq __fmt_int(%rip), %rdi
     call printf@PLT
-    
-    movq -8(%rbp), %rax
+
+    movq -16(%rbp), %rax
     pushq %rax
     movq $1, %rax
     movq %rax, %rcx
     popq %rax
     addq %rcx, %rax
+    movq %rax, -16(%rbp)
+
+    movq -8(%rbp), %rax
+    pushq %rax
+    movq $2, %rax
+    movq %rax, %rcx
+    popq %rax
+    imulq %rcx, %rax
     movq %rax, -8(%rbp)
 
-    jmp label_while_cond
-
-label_while_end:
-    movq $100, %rax
+    movq -8(%rbp), %rax
     movq %rax, %rsi
     movq $0, %rax
-    leaq print_fmt(%rip), %rdi
+    leaq __fmt_int(%rip), %rdi
+    call printf@PLT
+
+    jmp __while_0
+
+__endwhile_0:
+    movq -16(%rbp), %rax
+    movq %rax, %rsi
+    movq $0, %rax
+    leaq __fmt_int(%rip), %rdi
     call printf@PLT
 
     movq $0, %rax

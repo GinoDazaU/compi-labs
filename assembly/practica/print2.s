@@ -1,5 +1,8 @@
+# print(19)
+# print(100)
+
 .data
-print_fmt: .string "%ld\n"
+__fmt_int: .string "%ld\n"
 
 .text
 .globl main
@@ -8,13 +11,19 @@ main:
     pushq %rbp
     movq %rsp, %rbp
 
-    movq $67, %rax
+    movq $19, %rax
     movq %rax, %rsi
     movq $0, %rax
 
-    leaq print_fmt(%rip), %rdi
+    leaq __fmt_int(%rip), %rdi
     call printf@PLT
 
+    movq $100, %rax
+    movq %rax, %rsi
+    movq $0, %rdi
+    leaq __fmt_int(%rip), %rdi
+    call printf@PLT
+    
     movq $0, %rax
     leave
     ret

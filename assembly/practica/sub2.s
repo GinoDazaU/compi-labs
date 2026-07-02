@@ -1,5 +1,4 @@
-# print(5)
-# print(10)
+# print(25-15)
 
 .data
 __fmt_int: .string "%ld\n"
@@ -10,18 +9,15 @@ __fmt_int: .string "%ld\n"
 main:
     pushq %rbp
     movq %rsp, %rbp
-    
-    movq $5, %rax
+
+    movq $25, %rax
+    pushq %rax
+    movq $15, %rax
+    movq %rax, %rcx
+    popq %rax
+    subq %rcx, %rax
+
     movq %rax, %rsi
-    movq $0, %rax
-
-    leaq __fmt_int(%rip), %rdi
-    call printf@PLT
-
-    movq $10, %rax
-    movq %rax, %rsi
-    movq $0, %rax
-
     leaq __fmt_int(%rip), %rdi
     call printf@PLT
 
@@ -30,3 +26,4 @@ main:
     ret
 
 .section .note.GNU-stack,"",@progbits
+

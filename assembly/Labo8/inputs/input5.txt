@@ -1,8 +1,0 @@
-fun int id(int x)
-    return(x)
-endfun
-
-fun int main()
-    print(id(42));
-    return(0)
-endfun

@@ -1,12 +1,12 @@
-# x = 5
-# y = 10
-# if x < y:
-#     print(x+3)
+# x = 10
+# y = 20
+# if x > y:
+#     print(x)
 # else:
-#     print(y+2)
+#     print(y)
 
-.data 
-print_fmt: .string "%ld\n"
+.data
+__fmt_int: .string "%ld\n"
 
 .text
 .globl main
@@ -16,63 +16,42 @@ main:
     movq %rsp, %rbp
     subq $16, %rsp
 
-    # x = 5
-    movq $5, %rax
+    movq $10, %rax
     movq %rax, -8(%rbp)
 
-    # y = 10
-    movq $2, %rax
+    movq $20, %rax
     movq %rax, -16(%rbp)
 
-    # x < y
     movq -8(%rbp), %rax
     pushq %rax
     movq -16(%rbp), %rax
     movq %rax, %rcx
     popq %rax
+
     cmpq %rcx, %rax
     movq $0, %rax
-    setl %al
-    movzbq %al, %rax # resultado en rax
+    setg %al
+    movzbq %al, %rax
 
-    # if x < y
     cmpq $0, %rax
-    je label_else
+    je __else_0
 
-label_if:
     movq -8(%rbp), %rax
-    pushq %rax
-    movq $3, %rax
-    movq %rax, %rcx
-    popq %rax
-    addq %rcx, %rax
-
     movq %rax, %rsi
     movq $0, %rax
-
-    leaq print_fmt(%rip), %rdi
+    leaq __fmt_int(%rip), %rdi
     call printf@PLT
+    jmp __endif_0
 
-    jmp label_endif
-    
-
-label_else:
+__else_0:
     movq -16(%rbp), %rax
-    pushq %rax
-    movq $2, %rax
-    movq %rax, %rcx
-    popq %rax
-    addq %rcx, %rax
-
     movq %rax, %rsi
     movq $0, %rax
-
-    leaq print_fmt(%rip), %rdi
+    leaq __fmt_int(%rip), %rdi
     call printf@PLT
+    jmp __endif_0
 
-    jmp label_endif
-
-label_endif:
+__endif_0:
     movq $0, %rax
     leave
     ret

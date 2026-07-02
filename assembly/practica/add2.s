@@ -1,5 +1,4 @@
-# print(5)
-# print(10)
+# print(2 + 3)
 
 .data
 __fmt_int: .string "%ld\n"
@@ -10,18 +9,16 @@ __fmt_int: .string "%ld\n"
 main:
     pushq %rbp
     movq %rsp, %rbp
-    
-    movq $5, %rax
+
+    movq $2, %rax
+    pushq %rax
+    movq $3, %rax
+    movq %rax, %rcx
+    popq %rax
+    addq %rcx, %rax
+
     movq %rax, %rsi
     movq $0, %rax
-
-    leaq __fmt_int(%rip), %rdi
-    call printf@PLT
-
-    movq $10, %rax
-    movq %rax, %rsi
-    movq $0, %rax
-
     leaq __fmt_int(%rip), %rdi
     call printf@PLT
 
